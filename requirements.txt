@@ -1,3 +1,4 @@
 openai>=1.0.0
 streamlit>=1.28.0
-pathlib 
+pathlib
+requests>=2.25.0 

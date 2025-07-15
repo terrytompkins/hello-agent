@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Agent - Interactive System Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .flowchart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            text-align: center;
+        }
+
+        .component-info {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .component-info h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .component-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-left-color: #2980b9;
+        }
+
+        .component-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .component-card p {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .component-card .features {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .component-card .features h4 {
+            color: #34495e;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .component-card .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .component-card .features li {
+            padding: 5px 0;
+            color: #555;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .component-card .features li:before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .code-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .code-btn:hover {
+            background: #2980b9;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: none;
+        }
+
+        .code-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: #c0392b;
+        }
+
+        .code-popup h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-right: 40px;
+        }
+
+        .code-popup pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tech-tag {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .code-popup {
+                max-width: 95vw;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="container">
+        <h1>🤖 Hello Agent - Interactive System Architecture</h1>
+        
+        <div class="flowchart-container">
+            <div class="mermaid" id="flowchart">
+                graph TD
+                    %% User Interface Layer
+                    subgraph UI ["🎨 User Interface Layer"]
+                        CLI[Command Line Interface]
+                        WEB[Streamlit Web Interface]
+                        SIDEBAR[Configuration Sidebar]
+                        INPUT[User Input Forms]
+                        RESULTS[Results Display]
+                    end
+
+                    %% Agent Layer
+                    subgraph AGENTS ["🤖 Agent Layer"]
+                        HA[Hello Agent<br/>Basic API Integration]
+                        FA[File System Agent<br/>AI-Powered Analysis]
+                        HA_INIT[Initialize Agent]
+                        FA_INIT[Initialize OpenAI Client]
+                    end
+
+                    %% Processing Layer
+                    subgraph PROCESSING ["⚙️ Processing Layer"]
+                        HA_PROC[Weather Data Processing]
+                        FS_SCAN[File System Scanner]
+                        AI_ANALYSIS[AI Question Analysis]
+                        CALC_ENGINE[Calculation Engine]
+                    end
+
+                    %% Data Layer
+                    subgraph DATA ["💾 Data Layer"]
+                        WEATHER_API[OpenWeatherMap API]
+                        FILE_SYSTEM[Local File System]
+                        OPENAI_API[OpenAI GPT API]
+                        FILE_INFO[File Metadata Cache]
+                    end
+
+                    %% External Services
+                    subgraph EXTERNAL ["🌐 External Services"]
+                        WEATHER[Weather Data Service]
+                        AI_SERVICE[OpenAI GPT Service]
+                    end
+
+                    %% Flow Connections
+                    CLI --> HA
+                    WEB --> FA
+                    SIDEBAR --> FA_INIT
+                    INPUT --> FA
+
+                    HA --> HA_INIT
+                    FA --> FA_INIT
+                    FA_INIT --> OPENAI_API
+
+                    HA_INIT --> HA_PROC
+                    HA_PROC --> WEATHER_API
+                    WEATHER_API --> WEATHER
+                    WEATHER --> HA_PROC
+                    HA_PROC --> CLI
+
+                    FA --> FS_SCAN
+                    FS_SCAN --> FILE_SYSTEM
+                    FILE_SYSTEM --> FILE_INFO
+                    FILE_INFO --> AI_ANALYSIS
+                    AI_ANALYSIS --> OPENAI_API
+                    OPENAI_API --> AI_SERVICE
+                    AI_SERVICE --> AI_ANALYSIS
+                    AI_ANALYSIS --> CALC_ENGINE
+                    CALC_ENGINE --> FILE_INFO
+                    CALC_ENGINE --> RESULTS
+
+                    WEB --> SIDEBAR
+                    SIDEBAR --> FA
+                    FA --> RESULTS
+                    RESULTS --> WEB
+
+                    FS_SCAN -->|Error| ERROR[Error Handling]
+                    AI_ANALYSIS -->|Calculation Required| CALC_ENGINE
+                    AI_ANALYSIS -->|Direct Answer| RESULTS
+
+                    classDef uiLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+                    classDef agentLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+                    classDef processingLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+                    classDef dataLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+                    classDef externalLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+                    classDef errorLayer fill:#ffebee,stroke:#c62828,stroke-width:2px
+
+                    class CLI,WEB,SIDEBAR,INPUT,RESULTS uiLayer
+                    class HA,FA,HA_INIT,FA_INIT agentLayer
+                    class HA_PROC,FS_SCAN,AI_ANALYSIS,CALC_ENGINE processingLayer
+                    class WEATHER_API,FILE_SYSTEM,OPENAI_API,FILE_INFO dataLayer
+                    class WEATHER,AI_SERVICE externalLayer
+                    class ERROR errorLayer
+            </div>
+        </div>
+
+        <div class="component-info">
+            <h2>Component Details</h2>
+            <div class="component-grid">
+                <div class="component-card" onclick="showCode('hello_agent')">
+                    <h3>🤖 Hello Agent</h3>
+                    <p>A minimal "hello world" agent that demonstrates the fundamental agent pattern with basic API integration.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Weather API integration</li>
+                            <li>JSON response processing</li>
+                            <li>Error handling</li>
+                            <li>Interactive CLI</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Requests</span>
+                        <span class="tech-tag">JSON</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('file_agent')">
+                    <h3>📁 File System Agent</h3>
+                    <p>Advanced AI-powered agent that analyzes file systems and answers natural language questions using OpenAI GPT.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>File system scanning</li>
+                            <li>AI question answering</li>
+                            <li>Complex calculations</li>
+                            <li>Metadata collection</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">OpenAI GPT</span>
+                        <span class="tech-tag">Pathlib</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('streamlit_app')">
+                    <h3>🌐 Streamlit Interface</h3>
+                    <p>Modern web interface providing an interactive way to use the File System Agent with real-time visualizations.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Web-based UI</li>
+                            <li>Real-time processing</li>
+                            <li>Interactive visualizations</li>
+                            <li>Configuration management</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Streamlit</span>
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Pandas</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('processing')">
+                    <h3>⚙️ Processing Layer</h3>
+                    <p>Core processing components that handle data transformation, AI analysis, and calculation execution.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Data processing</li>
+                            <li>AI integration</li>
+                            <li>Calculation engine</li>
+                            <li>Error handling</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">OpenAI API</span>
+                        <span class="tech-tag">JSON</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('data_layer')">
+                    <h3>💾 Data Layer</h3>
+                    <p>Data management components that handle file system access, API communication, and metadata caching.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>File system access</li>
+                            <li>API communication</li>
+                            <li>Metadata caching</li>
+                            <li>Data persistence</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Pathlib</span>
+                        <span class="tech-tag">Requests</span>
+                        <span class="tech-tag">JSON</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('external_services')">
+                    <h3>🌐 External Services</h3>
+                    <p>External APIs and services that provide weather data and AI capabilities to the agent system.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Weather API integration</li>
+                            <li>OpenAI GPT service</li>
+                            <li>HTTP communication</li>
+                            <li>Error handling</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">OpenWeatherMap</span>
+                        <span class="tech-tag">OpenAI GPT</span>
+                        <span class="tech-tag">HTTP</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-popup" id="codePopup">
+        <button class="close-btn" onclick="closePopup()">×</button>
+        <h3 id="popupTitle">Code View</h3>
+        <pre id="popupContent"></pre>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        const codeSamples = {
+            'hello_agent': {
+                title: 'Hello Agent - Basic API Integration',
+                code: `class HelloAgent:
+    def __init__(self):
+        self.api_base_url = "http://api.openweathermap.org/data/2.5/weather"
+        self.api_key = "demo_key"
+        
+    def get_weather(self, city: str) -> Dict[str, Any]:
+        try:
+            params = {
+                'q': city,
+                'appid': self.api_key,
+                'units': 'metric'
+            }
+            response = requests.get(self.api_base_url, params=params)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return {"error": f"Failed to fetch weather data: {str(e)}"}
+    
+    def run(self, city: str) -> str:
+        print(f"🤖 Hello Agent is fetching weather data for: {city}")
+        weather_data = self.get_weather(city)
+        result = self.process_weather_data(weather_data)
+        return result`
+            },
+            'file_agent': {
+                title: 'File System Agent - AI-Powered Analysis',
+                code: `class FileSystemAgent:
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
+    
+    def scan_directory(self, root_path: str) -> Dict[str, Any]:
+        file_info = {
+            "total_files": 0,
+            "file_types": {},
+            "file_sizes": {},
+            "largest_files": []
+        }
+        
+        for item in root.rglob("*"):
+            if item.is_file():
+                file_info["total_files"] += 1
+                extension = item.suffix.lower() or "no_extension"
+                file_info["file_types"][extension] = file_info["file_types"].get(extension, 0) + 1
+                
+                size = item.stat().st_size
+                file_info["file_sizes"][str(item.relative_to(root))] = size
+                file_info["largest_files"].append((str(item.relative_to(root)), size))
+        
+        return file_info
+    
+    def answer_question(self, question: str, file_info: Dict[str, Any], root_path: str) -> str:
+        summary = self.create_summary(file_info, root_path)
+        
+        response = self.client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            max_tokens=500,
+            temperature=0.1
+        )
+        
+        return response.choices[0].message.content.strip()`
+            },
+            'streamlit_app': {
+                title: 'Streamlit Web Interface',
+                code: `def main():
+    st.set_page_config(
+        page_title="File System Analysis Agent",
+        page_icon="📁",
+        layout="wide"
+    )
+    
+    st.title("📁 File System Analysis Agent")
+    
+    # Sidebar for configuration
+    with st.sidebar:
+        api_key = st.text_input("OpenAI API Key", type="password")
+        
+    # Folder selection
+    folder_path = st.text_input("Folder Path", placeholder="/path/to/your/folder")
+    
+    # Question input
+    question = st.text_area("What would you like to know about the file system?")
+    
+    # Analyze button
+    if st.button("🔍 Analyze File System", type="primary"):
+        try:
+            agent = FileSystemAgent(api_key)
+            file_info = agent.scan_directory(folder_path)
+            answer = agent.answer_question(question, file_info, folder_path)
+            
+            st.success("✅ Analysis complete!")
+            st.markdown("**Answer:**")
+            st.write(answer)
+            
+        except Exception as e:
+            st.error(f"❌ Error during analysis: {str(e)}")`
+            },
+            'processing': {
+                title: 'Processing Layer - Data Transformation & AI Analysis',
+                code: `# Weather Data Processing
+def process_weather_data(self, weather_data: Dict[str, Any]) -> str:
+    if "error" in weather_data:
+        return f"❌ Error: {weather_data['error']}"
+    
+    city_name = weather_data.get('name', 'Unknown')
+    temp = weather_data.get('main', {}).get('temp', 0)
+    description = weather_data.get('weather', [{}])[0].get('description', '')
+    
+    result = f"🌍 Weather in {city_name}:\n"
+    result += f"🌡️  Temperature: {temp}°C\n"
+    result += f"☁️  Conditions: {description.capitalize()}"
+    
+    return result
+
+# AI Question Analysis
+def answer_question(self, question: str, file_info: Dict[str, Any], root_path: str) -> str:
+    system_prompt = """You are a helpful assistant that analyzes file systems.
+    For simple questions (counting, basic info): Answer directly with the number or information
+    For complex calculation questions: Start with "CALCULATE:" followed by a Python expression"""
+    
+    response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        max_tokens=500,
+        temperature=0.1
+    )
+    
+    return response.choices[0].message.content.strip()`
+            },
+            'data_layer': {
+                title: 'Data Layer - File System & API Communication',
+                code: `# File System Scanner
+def scan_directory(self, root_path: str) -> Dict[str, Any]:
+    root = Path(root_path)
+    file_info = {
+        "total_files": 0,
+        "file_types": {},
+        "file_sizes": {},
+        "largest_files": []
+    }
+    
+    try:
+        for item in root.rglob("*"):
+            if item.is_file():
+                file_info["total_files"] += 1
+                
+                # Get file extension
+                extension = item.suffix.lower() or "no_extension"
+                file_info["file_types"][extension] = file_info["file_types"].get(extension, 0) + 1
+                
+                # Get file size
+                size = item.stat().st_size
+                file_info["file_sizes"][str(item.relative_to(root))] = size
+                file_info["largest_files"].append((str(item.relative_to(root)), size))
+                
+    except PermissionError as e:
+        print(f"Warning: Permission denied accessing some files: {e}")
+    
+    return file_info
+
+# API Communication
+def get_weather(self, city: str) -> Dict[str, Any]:
+    try:
+        params = {
+            'q': city,
+            'appid': self.api_key,
+            'units': 'metric'
+        }
+        response = requests.get(self.api_base_url, params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Failed to fetch weather data: {str(e)}"}`
+            },
+            'external_services': {
+                title: 'External Services - Weather & AI APIs',
+                code: `# OpenWeatherMap API Integration
+class HelloAgent:
+    def __init__(self):
+        self.api_base_url = "http://api.openweathermap.org/data/2.5/weather"
+        self.api_key = "b1b15e88fa797225412429c1c50c122a1"  # Demo key
+        
+    def get_weather(self, city: str) -> Dict[str, Any]:
+        params = {
+            'q': city,
+            'appid': self.api_key,
+            'units': 'metric'
+        }
+        response = requests.get(self.api_base_url, params=params)
+        return response.json()
+
+# OpenAI GPT API Integration
+class FileSystemAgent:
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
+    
+    def answer_question(self, question: str, file_info: Dict[str, Any], root_path: str) -> str:
+        response = self.client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            max_tokens=500,
+            temperature=0.1
+        )
+        return response.choices[0].message.content.strip()`
+            }
+        };
+
+        function showCode(filename) {
+            const sample = codeSamples[filename];
+            if (sample) {
+                document.getElementById('popupTitle').textContent = sample.title;
+                document.getElementById('popupContent').textContent = sample.code;
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('codePopup').style.display = 'block';
+            }
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('codePopup').style.display = 'none';
+        }
+
+        // Close popup when clicking overlay
+        document.getElementById('overlay').addEventListener('click', closePopup);
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePopup();
+            }
+        });
+    </script>
+</body>
+</html> 

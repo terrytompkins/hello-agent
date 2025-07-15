@@ -103,20 +103,29 @@ class FileSystemAgent:
         system_prompt = """You are a helpful assistant that analyzes file systems. 
         You have been provided with detailed information about a directory hierarchy.
         
-        For questions that require calculations (like total size, average size, etc.), 
-        generate a Python expression that can be evaluated with the file_info data.
-        
         The file_info dictionary contains:
         - file_info['file_sizes']: dict mapping file paths to sizes in bytes
         - file_info['file_types']: dict mapping extensions to counts
         - file_info['total_files']: total number of files
         - file_info['total_directories']: total number of directories
         
-        Return your response in this format:
-        - For simple questions: Just answer directly
-        - For calculation questions: Start with "CALCULATE:" followed by a Python expression
+        For questions that require simple counting or basic information lookup, provide the direct answer.
+        For questions that require complex calculations (like filtering by file type and summing sizes), 
+        generate a Python expression that can be evaluated with the file_info data.
         
-        Example: "CALCULATE: sum(file_info['file_sizes'].values())"
+        IMPORTANT: When working with file extensions in calculations:
+        - file_info['file_types'] contains counts by extension (e.g., {'.jpg': 5, '.png': 3})
+        - file_info['file_sizes'] contains full file paths as keys (e.g., {'folder/image.jpg': 1024})
+        - To filter by extension, check if the file path ends with the extension
+        
+        Return your response in this format:
+        - For simple questions (counting, basic info): Answer directly with the number or information
+        - For complex calculation questions: Start with "CALCULATE:" followed by a Python expression
+        
+        Examples:
+        - "How many Python files?" → Answer directly with the count
+        - "What's the total size of image files?" → "CALCULATE: sum(size for file, size in file_info['file_sizes'].items() if file.endswith('.jpg') or file.endswith('.png') or file.endswith('.gif') or file.endswith('.svg'))"
+        - "What's the average file size?" → "CALCULATE: sum(file_info['file_sizes'].values()) / len(file_info['file_sizes'])"
         """
         
         user_prompt = f"""Here is the file system information:
@@ -163,7 +172,9 @@ Question: {question}"""
                         'str': str,
                         'int': int,
                         'float': float,
-                        'round': round
+                        'round': round,
+                        'any': any,
+                        'all': all
                     }
                     
                     # Execute the expression
