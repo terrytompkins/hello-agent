@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Agent - Interactive System Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .flowchart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            text-align: center;
+        }
+
+        .component-info {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .component-info h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .component-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-left-color: #2980b9;
+        }
+
+        .component-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .component-card p {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .component-card .features {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .component-card .features h4 {
+            color: #34495e;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .component-card .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .component-card .features li {
+            padding: 5px 0;
+            color: #555;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .component-card .features li:before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .code-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .code-btn:hover {
+            background: #2980b9;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: none;
+        }
+
+        .code-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: #c0392b;
+        }
+
+        .code-popup h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-right: 40px;
+        }
+
+        .code-popup pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tech-tag {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .code-popup {
+                max-width: 95vw;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="container">
+        <h1>🤖 Hello Agent - Interactive System Architecture</h1>
+        
+        <div class="flowchart-container">
+            <div class="mermaid" id="flowchart">
+                graph TD
+                    %% User Interface Layer
+                    subgraph UI ["🎨 User Interface"]
+                        CLI[Command Line Interface]
+                        INPUT[User Input: City Name]
+                        OUTPUT[Formatted Weather Display]
+                    end
+
+                    %% Agent Layer
+                    subgraph AGENT ["🤖 Hello Agent"]
+                        HA[Hello Agent<br/>Basic API Integration]
+                        HA_INIT[Initialize Agent]
+                        HA_CONFIG[Configure API Settings]
+                    end
+
+                    %% Processing Layer
+                    subgraph PROCESSING ["⚙️ Data Processing"]
+                        HA_PROC[Weather Data Processing]
+                        HA_FORMAT[Format Response]
+                        HA_ERROR[Error Handling]
+                    end
+
+                    %% Data Layer
+                    subgraph DATA ["💾 Data Layer"]
+                        WEATHER_API[OpenWeatherMap API]
+                        API_CONFIG[API Configuration]
+                        RESPONSE_CACHE[Response Cache]
+                    end
+
+                    %% External Services
+                    subgraph EXTERNAL ["🌐 External Service"]
+                        WEATHER[Weather Data Service]
+                    end
+
+                    %% Flow Connections
+                    CLI --> INPUT
+                    INPUT --> HA
+                    
+                    HA --> HA_INIT
+                    HA_INIT --> HA_CONFIG
+                    HA_CONFIG --> API_CONFIG
+                    
+                    HA --> HA_PROC
+                    HA_PROC --> WEATHER_API
+                    WEATHER_API --> WEATHER
+                    WEATHER --> HA_PROC
+                    
+                    HA_PROC --> HA_FORMAT
+                    HA_FORMAT --> OUTPUT
+                    OUTPUT --> CLI
+                    
+                    HA_PROC -->|Error| HA_ERROR
+                    HA_ERROR --> OUTPUT
+                    
+                    classDef uiLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+                    classDef agentLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+                    classDef processingLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+                    classDef dataLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+                    classDef externalLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+
+                    class CLI,INPUT,OUTPUT uiLayer
+                    class HA,HA_INIT,HA_CONFIG agentLayer
+                    class HA_PROC,HA_FORMAT,HA_ERROR processingLayer
+                    class WEATHER_API,API_CONFIG,RESPONSE_CACHE dataLayer
+                    class WEATHER externalLayer
+            </div>
+        </div>
+
+        <div class="component-info">
+            <h2>Component Details</h2>
+            <div class="component-grid">
+                <div class="component-card" onclick="showCode('hello_agent')">
+                    <h3>🤖 Hello Agent</h3>
+                    <p>A minimal "hello world" agent that demonstrates the fundamental agent pattern with basic API integration.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Weather API integration</li>
+                            <li>JSON response processing</li>
+                            <li>Error handling</li>
+                            <li>Interactive CLI</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Requests</span>
+                        <span class="tech-tag">JSON</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('api_integration')">
+                    <h3>🌐 API Integration</h3>
+                    <p>HTTP client implementation for fetching weather data from OpenWeatherMap API with error handling.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>HTTP GET requests</li>
+                            <li>Parameter handling</li>
+                            <li>Error catching</li>
+                            <li>Response validation</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Requests</span>
+                        <span class="tech-tag">HTTP</span>
+                        <span class="tech-tag">JSON</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('data_processing')">
+                    <h3>⚙️ Data Processing</h3>
+                    <p>JSON response parsing and formatting to create user-friendly weather information display.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>JSON parsing</li>
+                            <li>Data extraction</li>
+                            <li>Formatting</li>
+                            <li>Error handling</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">JSON</span>
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">String Formatting</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('user_interface')">
+                    <h3>🎨 User Interface</h3>
+                    <p>Command-line interface with interactive input/output and user-friendly error messages.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Interactive CLI</li>
+                            <li>Demo mode</li>
+                            <li>User input handling</li>
+                            <li>Emoji-enhanced output</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">CLI</span>
+                        <span class="tech-tag">Input/Output</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-popup" id="codePopup">
+        <button class="close-btn" onclick="closePopup()">×</button>
+        <h3 id="popupTitle">Code View</h3>
+        <pre id="popupContent"></pre>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        const codeSamples = {
+            'hello_agent': {
+                title: 'Hello Agent - Main Implementation',
+                code: `class HelloAgent:
+    def __init__(self):
+        """Initialize the agent with basic configuration."""
+        self.api_base_url = "http://api.openweathermap.org/data/2.5/weather"
+        self.api_key = "b1b15e88fa797225412429c1c50c122a1"  # Demo key
+        
+    def get_weather(self, city: str) -> Dict[str, Any]:
+        """Fetch weather data for a given city."""
+        try:
+            params = {
+                'q': city,
+                'appid': self.api_key,
+                'units': 'metric'
+            }
+            response = requests.get(self.api_base_url, params=params)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            return {"error": f"Failed to fetch weather data: {str(e)}"}
+    
+    def run(self, city: str) -> str:
+        """Main agent method - takes input, processes, and returns output."""
+        print(f"🤖 Hello Agent is fetching weather data for: {city}")
+        weather_data = self.get_weather(city)
+        result = self.process_weather_data(weather_data)
+        return result`
+            },
+            'api_integration': {
+                title: 'API Integration - Weather Data Fetching',
+                code: `def get_weather(self, city: str) -> Dict[str, Any]:
+    """Fetch weather data for a given city."""
+    try:
+        params = {
+            'q': city,
+            'appid': self.api_key,
+            'units': 'metric'  # Use Celsius
+        }
+        
+        response = requests.get(self.api_base_url, params=params)
+        response.raise_for_status()  # Raise exception for bad status codes
+        
+        return response.json()
+        
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Failed to fetch weather data: {str(e)}"}
+
+# Example API call
+api_key = "your-api-key"
+api_url = "http://api.openweathermap.org/data/2.5/weather"
+params = {
+    'q': 'London',
+    'appid': api_key,
+    'units': 'metric'
+}
+response = requests.get(api_url, params=params)
+weather_data = response.json()`
+            },
+            'data_processing': {
+                title: 'Data Processing - JSON Response Handling',
+                code: `def process_weather_data(self, weather_data: Dict[str, Any]) -> str:
+    """Process and format weather data into a readable response."""
+    if "error" in weather_data:
+        return f"❌ Error: {weather_data['error']}"
+    
+    try:
+        city_name = weather_data.get('name', 'Unknown')
+        country = weather_data.get('sys', {}).get('country', '')
+        temp = weather_data.get('main', {}).get('temp', 0)
+        description = weather_data.get('weather', [{}])[0].get('description', '')
+        humidity = weather_data.get('main', {}).get('humidity', 0)
+        
+        result = f"🌍 Weather in {city_name}, {country}:\\n"
+        result += f"🌡️  Temperature: {temp}°C\\n"
+        result += f"☁️  Conditions: {description.capitalize()}\\n"
+        result += f"💧 Humidity: {humidity}%"
+        
+        return result
+        
+    except Exception as e:
+        return f"❌ Error processing weather data: {str(e)}"
+
+# Example JSON response processing
+weather_data = {
+    "name": "London",
+    "sys": {"country": "GB"},
+    "main": {"temp": 15.2, "humidity": 65},
+    "weather": [{"description": "partly cloudy"}]
+}`
+            },
+            'user_interface': {
+                title: 'User Interface - Interactive CLI',
+                code: `def main():
+    """Main function to demonstrate the agent."""
+    print("=" * 50)
+    print("🤖 Hello Agent - Minimal AI Agent Demo")
+    print("=" * 50)
+    
+    # Initialize the agent
+    agent = HelloAgent()
+    
+    # Example usage
+    cities = ["London", "New York", "Tokyo"]
+    
+    for city in cities:
+        print(f"\\n📍 Querying weather for: {city}")
+        result = agent.run(city)
+        print(result)
+        print("-" * 30)
+    
+    # Interactive mode
+    print("\\n🎯 Try it yourself! (Enter 'quit' to exit)")
+    while True:
+        user_city = input("\\nEnter a city name: ").strip()
+        if user_city.lower() in ['quit', 'exit', 'q']:
+            break
+        
+        if user_city:
+            result = agent.run(user_city)
+            print(f"\\n{result}")
+
+# Example output
+🤖 Hello Agent - Minimal AI Agent Demo
+==================================================
+
+📍 Querying weather for: London
+🤖 Hello Agent is fetching weather data for: London
+🌍 Weather in London, GB:
+🌡️  Temperature: 15.2°C
+☁️  Conditions: Partly cloudy
+💧 Humidity: 65%`
+            }
+        };
+
+        function showCode(filename) {
+            const sample = codeSamples[filename];
+            if (sample) {
+                document.getElementById('popupTitle').textContent = sample.title;
+                document.getElementById('popupContent').textContent = sample.code;
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('codePopup').style.display = 'block';
+            }
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('codePopup').style.display = 'none';
+        }
+
+        // Close popup when clicking overlay
+        document.getElementById('overlay').addEventListener('click', closePopup);
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePopup();
+            }
+        });
+    </script>
+</body>
+</html> 
