@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File System Agent - Interactive System Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .flowchart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            text-align: center;
+        }
+
+        .component-info {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .component-info h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .component-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-left-color: #2980b9;
+        }
+
+        .component-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .component-card p {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .component-card .features {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .component-card .features h4 {
+            color: #34495e;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .component-card .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .component-card .features li {
+            padding: 5px 0;
+            color: #555;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .component-card .features li:before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .code-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .code-btn:hover {
+            background: #2980b9;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: none;
+        }
+
+        .code-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: #c0392b;
+        }
+
+        .code-popup h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-right: 40px;
+        }
+
+        .code-popup pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tech-tag {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .code-popup {
+                max-width: 95vw;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="container">
+        <h1>📁 File System Agent - Interactive System Architecture</h1>
+        
+        <div class="flowchart-container">
+            <div class="mermaid" id="flowchart">
+                graph TD
+                    %% User Interface Layer
+                    subgraph UI ["🎨 User Interface"]
+                        CLI[Command Line Interface]
+                        INPUT[User Input: Question + Path]
+                        OUTPUT[Formatted Analysis Results]
+                    end
+
+                    %% Agent Layer
+                    subgraph AGENT ["🤖 File System Agent"]
+                        FSA[File System Agent<br/>LLM-Powered Analysis]
+                        FSA_INIT[Initialize Agent]
+                        FSA_CONFIG[Configure OpenAI API]
+                    end
+
+                    %% Processing Layer
+                    subgraph PROCESSING ["⚙️ Data Processing"]
+                        SCAN[Directory Scanning]
+                        FILE_INFO[File Information Collection]
+                        LLM_QUERY[LLM Question Processing]
+                        EXPRESSION_EVAL[Expression Evaluation]
+                        VALIDATION[Expression Validation]
+                    end
+
+                    %% Analysis Layer
+                    subgraph ANALYSIS ["🧠 Analysis Engine"]
+                        OPENAI_API[OpenAI GPT API]
+                        PROMPT_ENG[Prompt Engineering]
+                        RESPONSE_PROC[Response Processing]
+                        ERROR_HANDLING[Error Handling & Retry]
+                    end
+
+                    %% Data Layer
+                    subgraph DATA ["💾 Data Layer"]
+                        FILE_SIZES[File Sizes Dictionary]
+                        FILE_TYPES[File Types Count]
+                        DIR_STRUCT[Directory Structure]
+                        LARGEST_FILES[Largest Files List]
+                    end
+
+                    %% Flow Connections
+                    CLI --> INPUT
+                    INPUT --> FSA
+                    
+                    FSA --> FSA_INIT
+                    FSA_INIT --> FSA_CONFIG
+                    FSA_CONFIG --> OPENAI_API
+                    
+                    FSA --> SCAN
+                    SCAN --> FILE_INFO
+                    FILE_INFO --> FILE_SIZES
+                    FILE_INFO --> FILE_TYPES
+                    FILE_INFO --> DIR_STRUCT
+                    FILE_INFO --> LARGEST_FILES
+                    
+                    FSA --> LLM_QUERY
+                    LLM_QUERY --> PROMPT_ENG
+                    PROMPT_ENG --> OPENAI_API
+                    OPENAI_API --> RESPONSE_PROC
+                    RESPONSE_PROC --> VALIDATION
+                    VALIDATION --> EXPRESSION_EVAL
+                    EXPRESSION_EVAL --> OUTPUT
+                    OUTPUT --> CLI
+                    
+                    RESPONSE_PROC -->|Error| ERROR_HANDLING
+                    ERROR_HANDLING --> PROMPT_ENG
+                    
+                    classDef uiLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+                    classDef agentLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+                    classDef processingLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+                    classDef analysisLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+                    classDef dataLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+
+                    class CLI,INPUT,OUTPUT uiLayer
+                    class FSA,FSA_INIT,FSA_CONFIG agentLayer
+                    class SCAN,FILE_INFO,LLM_QUERY,EXPRESSION_EVAL,VALIDATION processingLayer
+                    class OPENAI_API,PROMPT_ENG,RESPONSE_PROC,ERROR_HANDLING analysisLayer
+                    class FILE_SIZES,FILE_TYPES,DIR_STRUCT,LARGEST_FILES dataLayer
+            </div>
+        </div>
+
+        <div class="component-info">
+            <h2>Component Details</h2>
+            <div class="component-grid">
+                <div class="component-card" onclick="showCode('file_system_agent')">
+                    <h3>🤖 File System Agent</h3>
+                    <p>An intelligent agent that analyzes file systems using LLM-powered question answering and expression evaluation.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Directory scanning and analysis</li>
+                            <li>LLM-powered question answering</li>
+                            <li>Expression validation and evaluation</li>
+                            <li>Robust error handling</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">OpenAI API</span>
+                        <span class="tech-tag">Pathlib</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('directory_scanning')">
+                    <h3>📁 Directory Scanning</h3>
+                    <p>Comprehensive file system analysis that collects file sizes, types, directory structure, and metadata.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Recursive directory traversal</li>
+                            <li>File size and type collection</li>
+                            <li>Directory structure mapping</li>
+                            <li>Largest files identification</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Pathlib</span>
+                        <span class="tech-tag">OS</span>
+                        <span class="tech-tag">Statistics</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('llm_integration')">
+                    <h3>🧠 LLM Integration</h3>
+                    <p>OpenAI GPT integration with sophisticated prompt engineering for natural language file system queries.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Natural language processing</li>
+                            <li>Expression generation</li>
+                            <li>Response validation</li>
+                            <li>Error correction</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">OpenAI</span>
+                        <span class="tech-tag">GPT-3.5</span>
+                        <span class="tech-tag">Prompt Engineering</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+
+                <div class="component-card" onclick="showCode('expression_evaluation')">
+                    <h3>⚙️ Expression Evaluation</h3>
+                    <p>Safe execution environment for evaluating LLM-generated Python expressions with validation and error handling.</p>
+                    <div class="features">
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li>Safe expression evaluation</li>
+                            <li>Syntax validation</li>
+                            <li>Error recovery</li>
+                            <li>Result formatting</li>
+                        </ul>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Eval</span>
+                        <span class="tech-tag">Validation</span>
+                    </div>
+                    <button class="code-btn">View Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-popup" id="codePopup">
+        <button class="close-btn" onclick="closePopup()">×</button>
+        <h3 id="popupTitle">Code View</h3>
+        <pre id="popupContent"></pre>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        const codeSamples = {
+            'file_system_agent': {
+                title: 'File System Agent - Main Implementation',
+                code: `class FileSystemAgent:
+    def __init__(self, api_key: str):
+        """Initialize the agent with OpenAI API key."""
+        self.client = OpenAI(api_key=api_key)
+    
+    def scan_directory(self, root_path: str) -> Dict[str, Any]:
+        """Scan directory hierarchy and collect file information."""
+        root = Path(root_path)
+        if not root.exists():
+            raise ValueError(f"Directory '{root_path}' does not exist")
+        
+        file_info = {
+            "total_files": 0,
+            "total_directories": 0,
+            "file_types": {},
+            "file_sizes": {},
+            "directory_structure": [],
+            "largest_files": [],
+            "file_list": []
+        }
+        
+        # Scan directory and collect information
+        for item in root.rglob("*"):
+            if item.is_file():
+                file_info["total_files"] += 1
+                extension = item.suffix.lower() or "no_extension"
+                file_info["file_types"][extension] = file_info["file_types"].get(extension, 0) + 1
+                
+                try:
+                    size = item.stat().st_size
+                    file_info["file_sizes"][str(item.relative_to(root))] = size
+                    file_info["largest_files"].append((str(item.relative_to(root)), size))
+                except (OSError, PermissionError):
+                    pass
+                
+                file_info["file_list"].append(str(item.relative_to(root)))
+            elif item.is_dir():
+                file_info["total_directories"] += 1
+                file_info["directory_structure"].append(str(item.relative_to(root)))
+        
+        return file_info`
+            },
+            'directory_scanning': {
+                title: 'Directory Scanning - File System Analysis',
+                code: `def scan_directory(self, root_path: str) -> Dict[str, Any]:
+    """Scan directory hierarchy and collect file information."""
+    root = Path(root_path)
+    if not root.exists():
+        raise ValueError(f"Directory '{root_path}' does not exist")
+    
+    file_info = {
+        "total_files": 0,
+        "total_directories": 0,
+        "file_types": {},
+        "file_sizes": {},
+        "directory_structure": [],
+        "largest_files": [],
+        "file_list": []
+    }
+    
+    try:
+        for item in root.rglob("*"):
+            if item.is_file():
+                file_info["total_files"] += 1
+                
+                # Get file extension
+                extension = item.suffix.lower() or "no_extension"
+                file_info["file_types"][extension] = file_info["file_types"].get(extension, 0) + 1
+                
+                # Get file size
+                try:
+                    size = item.stat().st_size
+                    file_info["file_sizes"][str(item.relative_to(root))] = size
+                    file_info["largest_files"].append((str(item.relative_to(root)), size))
+                except (OSError, PermissionError):
+                    pass
+                
+                # Add to file list
+                file_info["file_list"].append(str(item.relative_to(root)))
+            
+            elif item.is_dir():
+                file_info["total_directories"] += 1
+                file_info["directory_structure"].append(str(item.relative_to(root)))
+    
+    except PermissionError as e:
+        print(f"Warning: Permission denied accessing some files: {e}")
+    
+    # Sort largest files by size (descending)
+    file_info["largest_files"].sort(key=lambda x: x[1], reverse=True)
+    file_info["largest_files"] = file_info["largest_files"][:10]  # Keep top 10
+    
+    return file_info`
+            },
+            'llm_integration': {
+                title: 'LLM Integration - OpenAI API Processing',
+                code: `def answer_question(self, question: str, file_info: Dict[str, Any], root_path: str) -> str:
+    """Use OpenAI to answer questions about the file system."""
+    summary = self.create_summary(file_info, root_path)
+    
+    system_prompt = """You are a file system analysis assistant. You MUST follow these strict rules:
+
+CRITICAL RULES FOR CALCULATE EXPRESSIONS:
+1. ONLY use these basic Python constructs: sum(), len(), basic arithmetic (+, -, *, /), and simple if conditions
+2. NEVER use: any(), all(), list comprehensions, nested functions, complex logic
+3. ONLY use simple string methods: .lower(), .endswith()
+4. ALWAYS use simple OR conditions for multiple file types: file.lower().endswith('.png') or file.lower().endswith('.jpg')
+5. NEVER use parentheses beyond what's absolutely necessary
+6. ALWAYS test your expression mentally before outputting
+
+RESPONSE FORMAT:
+- For COUNTING files (how many): Answer directly with the number from file_info['file_types']
+- For CALCULATING sizes (how much space): Start with "CALCULATE:" followed by a SIMPLE Python expression
+
+CRITICAL: Pay attention to the question type:
+- "number of", "count of", "how many" = COUNTING (use file_info['file_types'])
+- "size of", "space used", "total size" = CALCULATING (use CALCULATE: expression)"""
+
+    user_prompt = f"""Here is the file system information:
+
+{summary}
+
+Raw data for precise calculations:
+- File types: {json.dumps(file_info['file_types'], indent=2)}
+- Total files: {file_info['total_files']}
+- Total directories: {file_info['total_directories']}
+
+Question: {question}"""
+
+    try:
+        response = self.client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            max_tokens=500,
+            temperature=0.1
+        )
+        
+        return response.choices[0].message.content.strip()
+        
+    except Exception as e:
+        return f"Error calling OpenAI API: {str(e)}"`
+            },
+            'expression_evaluation': {
+                title: 'Expression Evaluation - Safe Execution',
+                code: `def _evaluate_calculation(self, answer: str, file_info: Dict[str, Any]) -> str:
+    """Evaluate a CALCULATE expression with robust error handling and retry logic."""
+    # Extract the Python expression
+    expression = answer[10:].strip()
+    
+    # Create a safe execution environment
+    safe_dict = {
+        'file_info': file_info,
+        'sum': sum,
+        'len': len,
+        'min': min,
+        'max': max,
+        'sorted': sorted,
+        'filter': filter,
+        'list': list,
+        'dict': dict,
+        'str': str,
+        'int': int,
+        'float': float,
+        'round': round,
+        'any': builtins.any,
+        'all': builtins.all,
+        'enumerate': enumerate,
+        'zip': zip,
+        'map': map,
+        'reversed': reversed
+    }
+    
+    # Try to fix common syntax issues
+    expression = self._fix_common_syntax_issues(expression)
+    
+    # Try to execute the expression
+    for attempt in range(2):
+        try:
+            # Execute the expression
+            try:
+                result = eval(expression, {"__builtins__": {}}, safe_dict)
+            except NameError:
+                result = eval(expression, safe_dict, safe_dict)
+            
+            # Format the result appropriately
+            if isinstance(result, (int, float)):
+                if result == 0:
+                    return f"Result: {result} (no matching files found)"
+                elif result > 1024:
+                    # Likely a size in bytes, format it
+                    formatted_result = self.format_size(result)
+                    return f"Result: {formatted_result} ({result:,} bytes)"
+                else:
+                    return f"Result: {result}"
+            else:
+                return f"Result: {result}"
+                
+        except Exception as calc_error:
+            if attempt == 0:
+                # First attempt failed, try to get a simpler expression from the LLM
+                simple_expression = self._get_simpler_expression(expression, str(calc_error))
+                if simple_expression:
+                    expression = simple_expression
+                    continue
+            
+            # If we get here, both attempts failed
+            return f"Error evaluating calculation: {str(calc_error)}\\nGenerated expression: {expression}"
+
+def _validate_expression(self, answer: str) -> bool:
+    """Validate that the CALCULATE expression follows safe patterns."""
+    expression = answer[10:].strip()
+    
+    # Check for forbidden constructs
+    forbidden_patterns = [
+        'any(', 'all(', 'filter(', 'map(', 'enumerate(',
+        'list(', 'dict(', 'set(', 'tuple(',
+        'lambda', 'def ', 'class ',
+        'import ', 'from ', 'try:', 'except:', 'finally:',
+        'if __name__', 'eval(', 'exec('
+    ]
+    
+    for pattern in forbidden_patterns:
+        if pattern in expression:
+            return False
+    
+    # Check for balanced parentheses
+    if expression.count('(') != expression.count(')'):
+        return False
+    
+    return True`
+            }
+        };
+
+        function showCode(filename) {
+            const sample = codeSamples[filename];
+            if (sample) {
+                document.getElementById('popupTitle').textContent = sample.title;
+                document.getElementById('popupContent').textContent = sample.code;
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('codePopup').style.display = 'block';
+            }
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('codePopup').style.display = 'none';
+        }
+
+        // Close popup when clicking overlay
+        document.getElementById('overlay').addEventListener('click', closePopup);
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePopup();
+            }
+        });
+    </script>
+</body>
+</html> 
